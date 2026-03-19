@@ -14,20 +14,6 @@ let authInstance: Auth | null = null;
 let dbInstance: Firestore | null = null;
 
 try {
-  const required = [
-    'FIREBASE_API_KEY',
-    'FIREBASE_AUTH_DOMAIN',
-    'FIREBASE_PROJECT_ID',
-    'FIREBASE_STORAGE_BUCKET',
-    'FIREBASE_MESSAGING_SENDER_ID',
-    'FIREBASE_APP_ID',
-    'FIREBASE_FIRESTORE_DATABASE_ID',
-  ] as const;
-
-  const missing = required.filter((k) => !process.env[k]);
-  if (missing.length > 0) {
-    throw new Error(`Missing Firebase env vars: ${missing.join(', ')}`);
-  }
 
   const firebaseConfig = {
     apiKey: process.env.FIREBASE_API_KEY as string,
