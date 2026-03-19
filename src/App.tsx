@@ -515,7 +515,12 @@ function App() {
       setImportText('');
     } catch (error) {
       console.error("Smart Import error:", error);
-      setImportError("Failed to extract places. Please try again.");
+      const msg = error instanceof Error ? error.message : String(error);
+      if (msg.toLowerCase().includes('gemini api key is not configured')) {
+        setImportError("Gemini is not configured. Add `GEMINI_API_KEY` in GitHub Secrets and redeploy, then try again.");
+      } else {
+        setImportError("Failed to extract places. Please try again.");
+      }
     } finally {
       setIsSyncing(false);
     }

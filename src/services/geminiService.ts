@@ -1,7 +1,13 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Category } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+// `tsconfig.json` does not include Node types; we only use `process.env` as Vite defines.
+declare const process: { env: Record<string, string | undefined> };
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+// Important: do not initialize Gemini at module-load if the key is missing.
+// Otherwise the whole app can crash on startup when the app is served without secrets.
+const ai = GEMINI_API_KEY ? new GoogleGenAI({ apiKey: GEMINI_API_KEY }) : null;
 
 export interface ExtractedPlace {
   name: string;
@@ -15,6 +21,12 @@ export interface ExtractedPlace {
 
 export async function extractPlacesFromText(text: string): Promise<ExtractedPlace[]> {
   try {
+    if (!ai) {
+      throw new Error(
+        "Gemini API key is not configured. Set `GEMINI_API_KEY` in GitHub Secrets and redeploy."
+      );
+    }
+
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Extract all places from the following text which was copied from a Google Maps list:
