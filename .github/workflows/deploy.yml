@@ -26,6 +26,7 @@ jobs:
       FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
       FIREBASE_FIRESTORE_DATABASE_ID: ${{ secrets.FIREBASE_FIRESTORE_DATABASE_ID }}
       GOOGLE_MAPS_PLATFORM_KEY: ${{ secrets.GOOGLE_MAPS_PLATFORM_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
