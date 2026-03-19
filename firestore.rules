@@ -1,0 +1,69 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: /users/{userId}/places/{placeId}
+    // Fields: id, name, address, categories (list), latitude, longitude, googleMapsUrl, note, importedAt, collectionId
+    //
+    // Collection: /users/{userId}/collections/{collectionId}
+    // Fields: id, name, createdAt, color
+    //
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        ((exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+          (request.auth.token.email == "kostiksm@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidPlace() {
+      let data = request.resource.data;
+      
+      return data.id is string && data.id.size() > 0 &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 200 &&
+             data.address is string && data.address.size() > 0 && data.address.size() < 500 &&
+             (!('categories' in data) || (data.categories is list)) &&
+             (!('latitude' in data) || data.latitude is number) &&
+             (!('longitude' in data) || data.longitude is number) &&
+             (!('importedAt' in data) || data.importedAt is number) &&
+             (!('collectionId' in data) || data.collectionId is string) &&
+             (!('googleMapsUrl' in data) || (data.googleMapsUrl is string && data.googleMapsUrl.size() < 1000)) &&
+             (!('note' in data) || (data.note is string && data.note.size() < 2000));
+    }
+
+    function isValidCollection() {
+      let data = request.resource.data;
+      return data.id is string && data.id.size() > 0 &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.createdAt is number &&
+             (!('color' in data) || (data.color is string && data.color.size() < 50));
+    }
+
+    match /users/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+      
+      match /places/{placeId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create, update: if (isOwner(userId) || isAdmin()) && isValidPlace();
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /collections/{collectionId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create, update: if (isOwner(userId) || isAdmin()) && isValidCollection();
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+    }
+  }
+}

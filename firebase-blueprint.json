@@ -1,0 +1,44 @@
+{
+  "entities": {
+    "Place": {
+      "title": "Place",
+      "description": "A saved location from Google Maps.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the place." },
+        "name": { "type": "string", "description": "Name of the place." },
+        "address": { "type": "string", "description": "Full address of the place." },
+        "categories": { "type": "array", "items": { "type": "string" }, "description": "Categories of the place." },
+        "latitude": { "type": "number", "description": "Latitude coordinate." },
+        "longitude": { "type": "number", "description": "Longitude coordinate." },
+        "googleMapsUrl": { "type": "string", "description": "Optional URL to the place on Google Maps." },
+        "note": { "type": "string", "description": "Optional user note about the place." },
+        "importedAt": { "type": "number", "description": "Timestamp when the place was imported." },
+        "collectionId": { "type": "string", "description": "ID of the collection this place belongs to." }
+      },
+      "required": ["id", "name", "address", "categories", "latitude", "longitude", "importedAt", "collectionId"]
+    },
+    "Collection": {
+      "title": "Collection",
+      "description": "A group of places.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the collection." },
+        "name": { "type": "string", "description": "Name of the collection." },
+        "createdAt": { "type": "number", "description": "Timestamp when the collection was created." },
+        "color": { "type": "string", "description": "Optional color for the collection." }
+      },
+      "required": ["id", "name", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/places/{placeId}": {
+      "schema": "Place",
+      "description": "User's saved places."
+    },
+    "/users/{userId}/collections/{collectionId}": {
+      "schema": "Collection",
+      "description": "User's collections."
+    }
+  }
+}

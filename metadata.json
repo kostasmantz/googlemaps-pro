@@ -1,0 +1,7 @@
+{
+  "name": "MapList Pro",
+  "description": "Save, sync, and map your favorite places from Google Maps. Features Smart Paste import, Firebase sync, and interactive map view.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
