@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { APIProvider, Map, AdvancedMarker, Pin, InfoWindow, useAdvancedMarkerRef, useMap, useMapsLibrary } from '@vis.gl/react-google-maps';
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth';
 import { collection, doc, setDoc, onSnapshot, query, orderBy, deleteDoc, getDocFromCache, getDocFromServer, updateDoc } from 'firebase/firestore';
-import { auth, db } from './services/firebase';
+import { auth, db, firebaseInitError } from './services/firebase';
 import { cn } from './utils/cn';
 import { Place, Category, Collection } from './types';
 import { extractPlacesFromText } from './services/geminiService';
@@ -276,6 +276,28 @@ function MapMarker({ place }: { place: Place, key?: string }) {
 }
 
 function App() {
+  if (firebaseInitError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50 text-center">
+        <div className="max-w-md">
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Firebase connection failed</h2>
+          <p className="text-slate-600 mb-4 text-sm">
+            {firebaseInitError.message || 'Please check your Firebase configuration.'}
+          </p>
+          <p className="text-slate-500 text-xs mb-6">
+            Ensure your GitHub Pages build has the required `FIREBASE_*` environment variables.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl shadow-lg active:scale-95 transition-transform"
+          >
+            Reload App
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [places, setPlaces] = useState<Place[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -292,6 +314,7 @@ function App() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [importUrl, setImportUrl] = useState('');
   const [importError, setImportError] = useState<string | null>(null);
+  const [firebaseRuntimeError, setFirebaseRuntimeError] = useState<string | null>(null);
   const [importMode, setImportMode] = useState<'link' | 'smart' | 'manual'>('link');
   const [importText, setImportText] = useState('');
   const [editingPlace, setEditingPlace] = useState<Place | null>(null);
@@ -311,7 +334,12 @@ function App() {
       try {
         await getDocFromServer(doc(db, 'test', 'connection'));
       } catch (error) {
-        if(error instanceof Error && error.message.includes('the client is offline')) {
+        const msg = error instanceof Error ? error.message : String(error);
+        if (msg.includes('auth/') || msg.includes('invalid-api-key')) {
+          setFirebaseRuntimeError(msg);
+          return;
+        }
+        if (msg.includes('the client is offline')) {
           console.error("Please check your Firebase configuration. ");
         }
       }
@@ -321,15 +349,21 @@ function App() {
 
   // Auth Listener
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      if (!user) {
-        // Load from local storage if not logged in
-        const saved = localStorage.getItem('maplist_places');
-        if (saved) setPlaces(JSON.parse(saved));
-      }
-    });
-    return () => unsubscribe();
+    try {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        setUser(user);
+        if (!user) {
+          // Load from local storage if not logged in
+          const saved = localStorage.getItem('maplist_places');
+          if (saved) setPlaces(JSON.parse(saved));
+        }
+      });
+      return () => unsubscribe();
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      setFirebaseRuntimeError(msg);
+      return;
+    }
   }, []);
 
   // Firestore Sync
@@ -386,6 +420,7 @@ function App() {
       await signInWithPopup(auth, provider);
     } catch (error) {
       console.error("Login error:", error);
+      if (error instanceof Error) setFirebaseRuntimeError(error.message);
     }
   };
 
@@ -395,6 +430,7 @@ function App() {
       setPlaces([]);
     } catch (error) {
       console.error("Logout error:", error);
+      if (error instanceof Error) setFirebaseRuntimeError(error.message);
     }
   };
 
@@ -583,6 +619,26 @@ function App() {
   const handleDeletePlace = async (id: string) => {
     await deletePlace(id);
   };
+
+  if (firebaseRuntimeError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50 text-center">
+        <div className="max-w-md">
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Firebase connection failed</h2>
+          <p className="text-slate-600 mb-4 text-sm">{firebaseRuntimeError}</p>
+          <p className="text-slate-500 text-xs mb-6">
+            If you recently changed secrets, wait for the next deployment to complete.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl shadow-lg active:scale-95 transition-transform"
+          >
+            Reload App
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col max-w-md mx-auto shadow-2xl relative overflow-hidden">
