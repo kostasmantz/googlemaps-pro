@@ -3,6 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      Firebase/Google APIs may enforce HTTP referrer restrictions on API keys.
+      GitHub Pages / some browsers can end up with `no-referrer`, which causes 403s.
+      `origin` ensures the `Referer` header includes the site origin.
+    -->
+    <meta name="referrer" content="origin" />
     <title>GoogleMaps Pro</title>
   </head>
   <body>
