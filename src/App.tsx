@@ -5,7 +5,7 @@
 
 import * as React from 'react';
 import { Component, useState, useMemo, useEffect, useCallback } from 'react';
-import { MapPin, Filter, Plus, Search, ChevronRight, Utensils, Camera, Trees, ShoppingBag, Coffee, MoreHorizontal, X, Map as MapIcon, Trash2, ExternalLink, Link as LinkIcon, Edit3, LogIn, LogOut, User, Tent } from 'lucide-react';
+import { MapPin, Filter, Plus, Search, ChevronRight, Utensils, Camera, Trees, ShoppingBag, Coffee, MoreHorizontal, X, Map as MapIcon, Trash2, ExternalLink, Link as LinkIcon, Edit3, LogIn, LogOut, User, Tent, Check, Beer } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { APIProvider, Map, AdvancedMarker, Pin, InfoWindow, useAdvancedMarkerRef, useMap, useMapsLibrary } from '@vis.gl/react-google-maps';
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth';
@@ -116,6 +116,8 @@ const hasValidKey = Boolean(GOOGLE_MAPS_API_KEY) && GOOGLE_MAPS_API_KEY !== 'YOU
 const CATEGORIES: { label: Category; icon: React.ReactNode; color: string; hex: string }[] = [
   { label: 'Restaurant', icon: <Utensils className="w-4 h-4" />, color: 'bg-orange-100 text-orange-600', hex: '#ea580c' },
   { label: 'Cafe', icon: <Coffee className="w-4 h-4" />, color: 'bg-amber-100 text-amber-600', hex: '#d97706' },
+  { label: 'Pub', icon: <Beer className="w-4 h-4" />, color: 'bg-red-100 text-red-600', hex: '#dc2626' },
+  { label: 'Sightseeing', icon: <Camera className="w-4 h-4" />, color: 'bg-indigo-100 text-indigo-600', hex: '#4f46e5' },
   { label: 'Campsite', icon: <Tent className="w-4 h-4" />, color: 'bg-emerald-100 text-emerald-600', hex: '#059669' },
   { label: 'Other', icon: <MoreHorizontal className="w-4 h-4" />, color: 'bg-slate-100 text-slate-600', hex: '#475569' },
 ];

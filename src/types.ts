@@ -11,7 +11,7 @@ export interface Place {
   collectionId: string;
 }
 
-export type Category = 'Restaurant' | 'Cafe' | 'Campsite' | 'Other';
+export type Category = 'Restaurant' | 'Cafe' | 'Campsite' | 'Pub' | 'Sightseeing' | 'Other';
 
 export interface Collection {
   id: string;

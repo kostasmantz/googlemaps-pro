@@ -36,7 +36,7 @@ export async function extractPlacesFromText(text: string): Promise<ExtractedPlac
       For each place, provide:
       - name: The name of the place
       - address: The full address
-      - categories: Array of categories, choosing from: Restaurant, Cafe, Campsite, Other
+      - categories: Array of categories, choosing from: Restaurant, Cafe, Pub, Sightseeing, Campsite, Other
       - googleMapsUrl: The URL to the place on Google Maps if available
       - note: Any short description or note if available
       - latitude: The approximate latitude of the place if you can determine it
@@ -56,7 +56,7 @@ export async function extractPlacesFromText(text: string): Promise<ExtractedPlac
                 type: Type.ARRAY,
                 items: {
                   type: Type.STRING,
-                  enum: ["Restaurant", "Cafe", "Campsite", "Other"]
+                  enum: ["Restaurant", "Cafe", "Pub", "Sightseeing", "Campsite", "Other"]
                 }
               },
               googleMapsUrl: { type: Type.STRING },
